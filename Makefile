@@ -14,12 +14,14 @@ CXX        = clang++
 # compiler option
 #CXXFLAGS   = -std=c++17 -static -g -O0
 CXXFLAGS   = -std=c++17 -static -g -O3 -mtune=native -march=native
-# include directory
-INCLUDE    = -I./inc
 # output
 TARGETS    = $(shell basename $(shell pwd)).out
 # output directory
 TARGETDIR  = .
+# header directory
+HDRROOT    = ./inc
+# include directory
+INCLUDE    = -I$(HDRROOT)
 # source directory
 SRCROOT    = ./src
 # object files
@@ -50,6 +52,19 @@ $(OBJROOT)/%.o: $(SRCROOT)/%.cpp
 
 # rebuild
 all: clean $(TARGETS)
+
+%.cpp:
+	touch $(SRCROOT)/$@
+
+%.hpp:
+	$(eval F := $(addprefix IG_,$(addsuffix _HPP,$*)))
+	@if [ ! -f $(HDRROOT)/$@ ]; then\
+		echo \#ifndef `echo $F | tr ‘[a-z]’ ‘[A-Z]’` > $(HDRROOT)/$@;\
+		echo \#define `echo $F | tr ‘[a-z]’ ‘[A-Z]’` >> $(HDRROOT)/$@;\
+		echo '' >> $(HDRROOT)/$@;\
+		echo \#endif >> $(HDRROOT)/$@;\
+		echo '' >> $(HDRROOT)/$@;\
+	fi
 
 # clean build
 clean:
